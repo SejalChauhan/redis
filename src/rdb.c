@@ -40,6 +40,8 @@
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sys/param.h>
+ #include <unistd.h>
+ #include <sys/time.h>
 
 #define RDB_LOAD_NONE   0
 #define RDB_LOAD_ENC    (1<<0)
@@ -906,6 +908,8 @@ int rdbSaveBackground(char *filename) {
     pid_t childpid;
     long long start;
 
+    struct timeval timestamp_cow;
+
     if (server.rdb_child_pid != -1) return C_ERR;
 
     server.dirty_before_bgsave = server.dirty;
@@ -914,7 +918,9 @@ int rdbSaveBackground(char *filename) {
     start = ustime();
     if ((childpid = fork()) == 0) {
         int retval;
-
+        gettimeofday(&timestamp_cow, NULL);
+        serverLog(LL_NOTICE,
+                    "timestamp_cow %llu\n", (long long unsigned int)(timestamp_cow.tv_sec * 1000000 + timestamp_cow.tv_usec));
         /* Child */
         closeListeningSockets(0);
         redisSetProcTitle("redis-rdb-bgsave");
@@ -1623,9 +1629,9 @@ int rdbSaveToSlavesSockets(void) {
             size_t private_dirty = zmalloc_get_private_dirty();
 
             if (private_dirty) {
+
                 serverLog(LL_NOTICE,
-                    "RDB: %zu MB of memory used by copy-on-write",
-                    private_dirty/(1024*1024));
+                    "RDB: %zu MB of memory used by copy-on-write", private_dirty/(1024*1024));
             }
 
             /* If we are returning OK, at least one slave was served

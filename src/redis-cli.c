@@ -53,6 +53,8 @@
 #include "help.h"
 #include "anet.h"
 #include "ae.h"
+ #include <unistd.h>
+ #include <sys/time.h>
 
 #define UNUSED(V) ((void) V)
 
@@ -1293,6 +1295,7 @@ static void latencyMode(void) {
                           LATENCY_HISTORY_DEFAULT_INTERVAL;
     double avg;
     long long history_start = mstime();
+    struct timeval timestamp_latency;
 
     if (!context) exit(1);
     while(1) {
@@ -1314,12 +1317,15 @@ static void latencyMode(void) {
             tot += latency;
             avg = (double) tot/count;
         }
-        printf("\x1b[0G\x1b[2Kmin: %lld, max: %lld, avg: %.2f (%lld samples)",
-            min, max, avg, count);
+        //printf("\x1b[0G\x1b[2Kmin: %lld, max: %lld, avg: %.2f (%lld samples)",
+            //min, max, avg, count);
+
+        gettimeofday(&timestamp_latency, NULL);
+        printf("timestamp %llu\n", (long long unsigned int)(timestamp_latency.tv_sec * 1000000 + timestamp_latency.tv_usec));
         fflush(stdout);
         if (config.latency_history && mstime()-history_start > history_interval)
         {
-            printf(" -- %.2f seconds range\n", (float)(mstime()-history_start)/1000);
+            //printf(" -- %.2f seconds range\n", (float)(mstime()-history_start)/1000);
             history_start = mstime();
             min = max = tot = count = 0;
         }
