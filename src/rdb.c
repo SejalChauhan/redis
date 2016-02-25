@@ -927,11 +927,13 @@ int rdbSaveBackground(char *filename) {
         retval = rdbSave(filename);
         if (retval == C_OK) {
             size_t private_dirty = zmalloc_get_private_dirty();
+            size_t rss = zmalloc_get_smap_bytes_by_field("Rss:");
+            size_t anonhuge = zmalloc_get_smap_bytes_by_field("AnonHugePages:");
 
             if (private_dirty) {
                 serverLog(LL_NOTICE,
-                    "RDB: %zu MB of memory used by copy-on-write",
-                    private_dirty/(1024*1024));
+                    "RDB: %zu MB of memory used by copy-on-write, RSS %zu MB, Huge Pages %zu MB",
+                    private_dirty/(1024*1024), rss/(1024*1024), anonhuge/(1024*1024));
             }
         }
         exitFromChild((retval == C_OK) ? 0 : 1);
