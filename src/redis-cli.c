@@ -1321,7 +1321,7 @@ static void latencyMode(void) {
             //min, max, avg, count);
 
         gettimeofday(&timestamp_latency, NULL);
-        printf("timestamp %llu\n", (long long unsigned int)(timestamp_latency.tv_sec * 1000000 + timestamp_latency.tv_usec));
+        printf("timestamp %llu avg: %.2f\n", (long long unsigned int)(timestamp_latency.tv_sec * 1000000 + timestamp_latency.tv_usec), avg);
         fflush(stdout);
         if (config.latency_history && mstime()-history_start > history_interval)
         {
