@@ -1324,7 +1324,9 @@ static void latencyMode(void) {
         fflush(stdout);
         if (config.latency_history && mstime()-history_start > history_interval)
         {
-            printf("timestamp %llu max: %lld\n", (long long unsigned int)(timestamp_latency.tv_sec * 1000000 + timestamp_latency.tv_usec), max);
+            size_t rss = zmalloc_get_smap_bytes_by_field("Rss:");
+            printf("timestamp %llu rss:%zu max: %lld\n", (long long unsigned int)(timestamp_latency.tv_sec * 1000000 + timestamp_latency.tv_usec), 
+                                                         rss/(1024*1024), max);
             //printf(" -- %.2f seconds range\n", (float)(mstime()-history_start)/1000);
             history_start = mstime();
             min = max = tot = count = 0;
